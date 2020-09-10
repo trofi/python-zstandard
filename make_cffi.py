@@ -8,6 +8,7 @@ from __future__ import absolute_import
 
 import cffi
 import distutils.ccompiler
+import distutils.sysconfig
 import os
 import re
 import subprocess
@@ -75,10 +76,13 @@ compiler = distutils.ccompiler.new_compiler()
 if hasattr(compiler, "initialize"):
     compiler.initialize()
 
+# Allow users to override compiler with CC
+distutils.sysconfig.customize_compiler(compiler)
+
 # Distutils doesn't set compiler.preprocessor, so invoke the preprocessor
 # manually.
 if compiler.compiler_type == "unix":
-    args = list(compiler.executables["compiler"])
+    args = compiler.compiler
     args.extend(
         ["-E", "-DZSTD_STATIC_LINKING_ONLY", "-DZDICT_STATIC_LINKING_ONLY",]
     )
